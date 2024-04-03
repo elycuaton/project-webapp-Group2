@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ECR_PUBLIC_REGISTRY = 'public.ecr.aws/k1x3p9a5/group2-repository' 
+        ECR_REGISTRY = '992382806869.dkr.ecr.us-east-1.amazonaws.com/group2-repository'
     }
 
     stages {
