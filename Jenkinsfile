@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ECR_REGISTRY = '992382806869.dkr.ecr.us-east-1.amazonaws.com/group2-repository'
+        ECR_PUBLIC_REGISTRY = 'public.ecr.aws/your-registry-alias' // Replace with your actual public registry alias
     }
 
     stages {
@@ -15,8 +15,8 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', usernameVariable: 'AWS_ID', passwordVariable: 'AWS_SECRET')]) {
-                        sh "echo $AWS_SECRET | docker login --username $AWS_ID --password-stdin $ECR_REGISTRY"
+                    withCredentials([usernamePassword(credentialsId: 'aws-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
                     }
                 }
             }
@@ -25,11 +25,8 @@ pipeline {
         stage('Build and Push Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-                        sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
-                        def appImage = docker.build("$ECR_REGISTRY:${env.BUILD_ID}")
-                        appImage.push()
-                    } 
+                    def appImage = docker.build("${ECR_PUBLIC_REGISTRY}/group2-repository:${env.BUILD_ID}") 
+                    appImage.push()
                 }
             }
         }
