@@ -19,9 +19,9 @@ pipeline {
                         sh 'echo $AWS_SECRET | docker login -u $AWS_ID --password-stdin https://$ECR_REGISTRY'
                         def appImage = docker.build("$ECR_REGISTRY:${env.BUILD_ID}")
                         appImage.push()
+                    } 
                 }
             }
         }
     }
 }
-
