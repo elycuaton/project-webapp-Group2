@@ -12,6 +12,16 @@ pipeline {
             }
         }
 
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', usernameVariable: 'AWS_ID', passwordVariable: 'AWS_SECRET')]) {
+                        sh "echo $AWS_SECRET | docker login --username $AWS_ID --password-stdin $ECR_REGISTRY"
+                    }
+                }
+            }
+        }
+
         stage('Build and Push Image') {
             steps {
                 script {
