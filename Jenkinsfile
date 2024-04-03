@@ -12,21 +12,14 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
-                    }
-                }
-            }
-        }
-
         stage('Build and Push Image') {
             steps {
                 script {
-                    def appImage = docker.build("${ECR_PUBLIC_REGISTRY}/group2-repository:${env.BUILD_ID}") 
-                    appImage.push()
+                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
+                        sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
+                        def appImage = docker.build("$ECR_REGISTRY:${env.BUILD_ID}")
+                        appImage.push()
+                    } 
                 }
             }
         }
