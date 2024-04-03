@@ -23,7 +23,7 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    docker.withRegistry('https://992382806869.dkr.ecr.us-east-1.amazonaws.com', '992382806869') {
+                    docker.withRegistry('https://992382806869.dkr.ecr.us-east-1.amazonaws.com', 'a6e48d27-aec6-4029-90cd-aae1acaaf636') {
                     def appImage = docker.image("${ECR_REGISTRY}:${env.BUILD_ID}")
                     appImage.push()
             }
