@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ECR_PUBLIC_REGISTRY = 'public.ecr.aws/your-registry-alias' // Replace with your actual public registry alias
+        ECR_PUBLIC_REGISTRY = 'public.ecr.aws/k1x3p9a5/group2-repository' 
     }
 
     stages {
