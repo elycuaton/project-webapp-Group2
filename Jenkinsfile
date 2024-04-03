@@ -15,7 +15,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    def appImage = docker.build("${ECR_REGISTRY}:${env.BUILD_ID}")
+                    def appImage = docker.build("group2-repository:${env.BUILD_ID}")
                 }
             }
         }
@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://992382806869.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:ecr-registry-credentials') {
-                        def appImage = docker.image("${ECR_REGISTRY}:${env.BUILD_ID}")
+                        def appImage = docker.image("group2-repository:${env.BUILD_ID}")
                         appImage.push()
                     }
                 }
