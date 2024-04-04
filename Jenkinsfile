@@ -28,9 +28,6 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
                         // Log in to AWS ECR
                         sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
-                    }
-
-                        
 
                         // Build and push Docker image
                         def appImage = docker.build("${ECR_REGISTRY}:${env.BUILD_ID}")
@@ -40,5 +37,4 @@ pipeline {
             }
         }
     }
-}
 }
