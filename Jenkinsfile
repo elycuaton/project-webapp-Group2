@@ -20,7 +20,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-                        // Login to the AWS public ECR
+                        // Diagnostic command to check AWS CLI version and availability
+                        sh 'aws --version'
+
+                        // Attempt to login to the AWS public ECR
                         sh 'aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
 
                         // Build the Docker image using the Dockerfile in your project
