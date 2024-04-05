@@ -6,34 +6,26 @@ pipeline {
             steps {
                 script {
                     // Check Docker & AWS CLI version
-                    sh 'docker --version'
-                    sh 'aws --version'
+                    bat 'docker --version'
+                    bat '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe" --version'
                 }
             }
         }
 
-        stage('Print Environment') {
+        stage('Check Environment on Jenkins Agent') {
             steps {
                 script {
-                    // Print environment details to diagnose issues
-                    sh 'env'
-                    sh 'which aws'
+                    // Print PATH environment variable to check if AWS CLI v2 path is included
+                    bat 'echo %PATH%'
                 }
-            }
-        }
-
-        stage('Checkout Code') {
-            steps {
-                // Checkout the source code from SCM (e.g., Git)
-                checkout scm
             }
         }
 
         stage('Login to ECR Public') {
             steps {
                 script {
-                    // Use the full path to AWS CLI to log in to AWS ECR Public
-                    sh '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe" ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
+                    // Log in to AWS ECR Public using AWS CLI v2
+                    bat '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe" ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
                 }
             }
         }
@@ -42,7 +34,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image
-                    sh 'docker build -t group2-repository .'
+                    bat 'docker build -t group2-repository .'
                 }
             }
         }
@@ -51,7 +43,7 @@ pipeline {
             steps {
                 script {
                     // Tag the Docker image
-                    sh 'docker tag group2-repository:latest public.ecr.aws/k1x3p9a5/group2-repository:latest'
+                    bat 'docker tag group2-repository:latest public.ecr.aws/k1x3p9a5/group2-repository:latest'
                 }
             }
         }
@@ -60,7 +52,7 @@ pipeline {
             steps {
                 script {
                     // Push the Docker image to AWS ECR Public
-                    sh 'docker push public.ecr.aws/k1x3p9a5/group2-repository:latest'
+                    bat 'docker push public.ecr.aws/k1x3p9a5/group2-repository:latest'
                 }
             }
         }
