@@ -37,21 +37,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to AWS') {
-            steps {
-                script {
-                    // Your deployment logic here
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                sh "docker rmi ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
-            }
-        }
     }
 }
