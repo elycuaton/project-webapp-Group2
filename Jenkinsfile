@@ -1,15 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // Define your public ECR repository URI
-        ECR_REGISTRY = 'public.ecr.aws/k1x3p9a5/group2-repository'
-        // Define the AWS region your ECR repository resides in
-        AWS_REGION = 'us-east-1'
-        // Define the Docker image name
-        IMAGE_NAME = 'demo'
-    }
-
     stages {
         stage('Pre-Checks') {
             steps {
@@ -28,25 +19,38 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Login to ECR Public') {
             steps {
                 script {
-                    // Build the Docker image with the 'demo' tag
-                    docker.build("${IMAGE_NAME}")
+                    // Log in to AWS ECR Public
+                    sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-                        // Correctly log in to AWS ECR using the AWS CLI to get the login password
-                        sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
-        
-                        // Tag and push the 'latest' tag to ECR
-                        docker.image("${IMAGE_NAME}").push('latest')
-                    }
+                    // Build the Docker image
+                    sh 'docker build -t group2-repository .'
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    // Tag the Docker image
+                    sh 'docker tag group2-repository:latest public.ecr.aws/k1x3p9a5/group2-repository:latest'
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to AWS ECR Public
+                    sh 'docker push public.ecr.aws/k1x3p9a5/group2-repository:latest'
                 }
             }
         }
