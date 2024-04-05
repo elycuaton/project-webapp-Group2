@@ -41,9 +41,9 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-                        // Log in to AWS ECR
+                        // Correctly log in to AWS ECR using the AWS CLI to get the login password
                         sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
-
+        
                         // Tag and push the 'latest' tag to ECR
                         docker.image("${IMAGE_NAME}").push('latest')
                     }
