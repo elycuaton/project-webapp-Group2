@@ -21,14 +21,13 @@ pipeline {
                 checkout scm
             }
         }
-
         stage('Build and Push Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-                        // Log in to AWS ECR
-                        sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
-
+                        // Use AWS CLI to log in to the ECR public repository
+                        sh 'aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
+                        
                         // Build and push Docker image
                         def appImage = docker.build("${ECR_REGISTRY}:${env.BUILD_ID}")
                         appImage.push()
