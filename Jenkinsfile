@@ -1,38 +1,66 @@
 pipeline {
-    agent any
-
     environment {
-        // Define your public ECR repository
-        ECR_REGISTRY = 'public.ecr.aws/k1x3p9a5/group2-repository'
-        // Define your AWS region
-        AWS_REGION = 'us-east-1'
+        // Define the ECR registry URL
+        ECR_REGISTRY = 'public.ecr.aws/k1x3p9a5'
+        // Define your repository name
+        ECR_REPOSITORY = 'group2-repository'
+        // Define your image tag, could be dynamic based on Git commit or a static value like 'latest'
+        IMAGE_TAG = 'latest'
     }
+    
+    agent any
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Checkout the source code from SCM (e.g., Git)
+                // Checks out the Git repository
                 checkout scm
             }
         }
 
-        stage('Build and Push Image') {
+        stage('Build Docker Image') {
+            steps {
+                // Builds the Docker image and tags it with the ECR repository
+                script {
+                    docker.build("${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}")
+                }
+            }
+        }
+
+        stage('Login to AWS ECR') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-                        // Diagnostic command to check AWS CLI version and availability
-                        sh 'aws --version'
-
-                        // Attempt to login to the AWS public ECR
-                        sh 'aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
-
-                        // Build the Docker image using the Dockerfile in your project
-                        def appImage = docker.build("${ECR_REGISTRY}:${env.BUILD_ID}")
-
-                        // Push the built image to your AWS public ECR repository
-                        appImage.push()
-                    }
+                    // Login to AWS ECR. You need to have AWS CLI installed and configured on Jenkins
+                    sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
                 }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Pushes the Docker image to ECR
+                    sh "docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        // Optional: Additional stages to deploy your Docker image to AWS ECS or other services
+        
+        stage('Deploy to AWS') {
+            steps {
+                script {
+                    // Your deployment script goes here. This might involve updating an ECS service or a Kubernetes deployment
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up Docker images to ensure the Jenkins agent doesn't run out of disk space
+            script {
+                sh "docker rmi ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
             }
         }
     }
