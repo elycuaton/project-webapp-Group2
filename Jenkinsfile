@@ -33,8 +33,7 @@ pipeline {
             steps {
                 script {
                     // Use the full path to AWS CLI to log in to AWS ECR Public
-                    // Replace "/usr/local/bin/aws" with the actual path on your Jenkins agent
-                    sh '/usr/local/bin/aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
+                    sh '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe" ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
                 }
             }
         }
