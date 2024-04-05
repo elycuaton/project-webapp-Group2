@@ -1,58 +1,37 @@
 pipeline {
     agent any
 
+    environment {
+        // Define your public ECR repository
+        ECR_REGISTRY = 'public.ecr.aws/k1x3p9a5/group2-repository'
+        // Define your AWS region
+        AWS_REGION = 'us-east-1'
+    }
+
     stages {
-        stage('Pre-Checks') {
+        stage('Checkout Code') {
             steps {
-                script {
-                    // Check Docker & AWS CLI version
-                    bat 'docker --version'
-                    bat '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe" --version'
-                }
+                // Checkout the source code from SCM (e.g., Git)
+                checkout scm
             }
         }
 
-        stage('Check Environment on Jenkins Agent') {
+        stage('Build and Push Image') {
             steps {
                 script {
-                    // Print PATH environment variable to check if AWS CLI v2 path is included
-                    bat 'echo %PATH%'
-                }
-            }
-        }
+                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-credentials', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
+                        // Diagnostic command to check AWS CLI version and availability
+                        sh 'aws --version'
 
-        stage('Login to ECR Public') {
-            steps {
-                script {
-                    // Log in to AWS ECR Public using AWS CLI v2
-                    bat '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe" ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5'
-                }
-            }
-        }
+                        // Attempt to login to the AWS public ECR
+                        sh 'aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build the Docker image
-                    bat 'docker build -t group2-repository .'
-                }
-            }
-        }
+                        // Build the Docker image using the Dockerfile in your project
+                        def appImage = docker.build("${ECR_REGISTRY}:${env.BUILD_ID}")
 
-        stage('Tag Docker Image') {
-            steps {
-                script {
-                    // Tag the Docker image
-                    bat 'docker tag group2-repository:latest public.ecr.aws/k1x3p9a5/group2-repository:latest'
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Push the Docker image to AWS ECR Public
-                    bat 'docker push public.ecr.aws/k1x3p9a5/group2-repository:latest'
+                        // Push the built image to your AWS public ECR repository
+                        appImage.push()
+                    }
                 }
             }
         }
