@@ -22,13 +22,14 @@ pipeline {
             }
         }
 
-        stage('Login to AWS ECR') {
+        stage('Login to AWS ECR Public') {
             steps {
                 script {
-                    sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
+                    sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k1x3p9a5"
                 }
             }
         }
+
 
         stage('Tag Docker Image') {
             steps {
