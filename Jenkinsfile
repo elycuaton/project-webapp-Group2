@@ -46,5 +46,13 @@ pipeline {
                 }
             }
         }
+        
+        stage('Deploy to Apache') {
+            steps {
+                script {
+                    sh 'scp /var/lib/jenkins/workspace/Build\ and\ Push\ Docker\ Image/index.html /var/www/html/'
+                    }
+                }
+            }
     }
 }
