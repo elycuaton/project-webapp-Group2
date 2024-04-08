@@ -1,6 +1,7 @@
 pipeline {
     environment {
-        ECR_REGISTRY = 'public.ecr.aws/k1x3p9a5'
+        ECR_REGION = 'us-east-2'
+        ECR_REGISTRY = '992382763363.dkr.ecr.us-east-2.amazonaws.com'
         ECR_REPOSITORY = 'group2-repository'
         IMAGE_TAG = 'latest'
     }
@@ -25,7 +26,7 @@ pipeline {
         stage('Login to AWS ECR') {
             steps {
                 script {
-                    sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
+                    sh 'aws ecr-public get-login-password --region ${ECR_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
                 }
             }
         }
@@ -39,3 +40,5 @@ pipeline {
         }
     }
 }
+
+
