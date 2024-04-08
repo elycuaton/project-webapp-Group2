@@ -4,7 +4,7 @@ pipeline {
         ECR_REPOSITORY = 'group2-repository'
         IMAGE_TAG = 'latest'
     }
-    
+
     agent any
 
     stages {
@@ -26,6 +26,14 @@ pipeline {
             steps {
                 script {
                     sh 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    sh "docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
                 }
             }
         }
