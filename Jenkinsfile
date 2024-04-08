@@ -50,7 +50,7 @@ pipeline {
         stage('Deploy to Apache') {
             steps {
                 script {
-                    sh 'scp /var/lib/jenkins/workspace/Build\ and\ Push\ Docker\ Image/index.html /var/www/html/'
+                    sh 'scp /var/lib/jenkins/workspace/docker-build/index.html /var/www/html/'
                     }
                 }
             }
