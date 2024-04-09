@@ -50,8 +50,8 @@ pipeline {
         stage('Deploy to Apache') {
             steps {
                 script {
-                    sh 'sudo chown -R $USER:$USER /var/www'
-                    sh 'scp /var/lib/jenkins/workspace/docker-build/index.html /var/www/html/'
+                    sh 'sudo -i chown -R $USER:$USER /var/www'
+                    sh 'sudo -i scp /var/lib/jenkins/workspace/docker-build/index.html /var/www/html/'
                     }
                 }
             }
